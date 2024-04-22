@@ -33,7 +33,7 @@ const char index_html[] PROGMEM = R"rawliteral(
     <style>
       body { font-family: Arial; text-align: center; margin:0px auto; padding-top: 30px;}
       .button {
-        padding: 10px 20px;
+        padding: 10px 30px;
         font-size: 24px;
         text-align: center;
         outline: none;
