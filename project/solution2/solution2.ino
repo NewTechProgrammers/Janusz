@@ -19,7 +19,7 @@
 #include <ESPAsyncWebServer.h>
 
 // REPLACE WITH YOUR NETWORK CREDENTIALS
-const char* ssid = "SafeRound";
+const char* ssid = "Janusz";
 const char* password = "11111111";
 
 const int output = 4;
@@ -33,7 +33,8 @@ const char index_html[] PROGMEM = R"rawliteral(
     <style>
       body { font-family: Arial; text-align: center; margin:0px auto; padding-top: 30px;}
       .button {
-        padding: 10px 30px;
+        padding: 10px 80px;
+        height: 60px;
         font-size: 24px;
         text-align: center;
         outline: none;
@@ -80,16 +81,16 @@ AsyncWebServer server(80);
 
 void setup() {
   Serial.begin(9600);
-  WiFi.mode(WIFI_STA);
-  WiFi.begin(ssid, password);
-  if (WiFi.waitForConnectResult() != WL_CONNECTED) {
-    Serial.println("WiFi Failed!");
-    return;
-  }
-  Serial.println("y");
-  Serial.println();
-  Serial.print("ESP IP Address: http://");
-  Serial.println(WiFi.localIP());
+  Serial.print("Setting AP (Access Point)…");
+  WiFi.softAP(ssid, password);
+
+  IPAddress IP = WiFi.softAPIP();
+  Serial.print("AP IP address: ");
+  Serial.println(IP);
+
+  // Print ESP8266 Local IP Address
+  Serial.println(WiFi.localIP()); // 192.168.4.1
+  
   
   pinMode(output, OUTPUT);
   digitalWrite(output, LOW);
