@@ -114,7 +114,7 @@ void receiveEvent(size_t howMany) {
   Serial.println(x);
 
   if (x == 102) {
-    Serial.println("DAMN!!!");
+    Serial.println("Forward!!!");
 
     // left side
     digitalWrite(motorA1, LOW);
@@ -127,13 +127,39 @@ void receiveEvent(size_t howMany) {
     analogWrite(motorBPWM, 127);
 
     // right side
+    digitalWrite(motorAA1, HIGH);
+    digitalWrite(motorAA2, LOW);
 
     digitalWrite(motorBB1, LOW);
     digitalWrite(motorBB2, HIGH);
 
     analogWrite(motorAAPWM, 127);
     analogWrite(motorBBPWM, 127);
+  }
+  if (x == 98) {
+    Serial.println("Backward!!!");
 
+    
+    // left side
+    digitalWrite(motorA1, HIGH);
+    digitalWrite(motorA2, LOW);
+
+    digitalWrite(motorB1, HIGH);
+    digitalWrite(motorB2, LOW);
+
+    analogWrite(motorAPWM, 127);
+    analogWrite(motorBPWM, 127);
+
+    // right side
+
+    digitalWrite(motorAA1, LOW);
+    digitalWrite(motorAA2, HIGH);
+
+    digitalWrite(motorBB1, HIGH);
+    digitalWrite(motorBB2, LOW);
+
+    analogWrite(motorAAPWM, 127);
+    analogWrite(motorBBPWM, 127);
   }
   if (x == 101) {
     // left side
@@ -147,6 +173,8 @@ void receiveEvent(size_t howMany) {
     analogWrite(motorBPWM, 0);
 
     // right side
+    digitalWrite(motorAA1, HIGH);
+    digitalWrite(motorAA2, LOW);
 
     digitalWrite(motorBB1, HIGH);
     digitalWrite(motorBB2, LOW);
