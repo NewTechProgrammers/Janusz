@@ -30,6 +30,10 @@ int motorBB1 = 4;
 int motorBB2 = 3;
 int motorBBPWM = 2;
 
+int headerA1 = 47;
+int headerA2 = 43;
+int headerPWM = 45;
+
 void setup() {
   Serial.begin(9600);
   Wire.begin(8);  // join i2c bus with address #8
@@ -56,6 +60,11 @@ void setup() {
   pinMode(motorBB2, OUTPUT);
   pinMode(motorBBPWM, OUTPUT);
 
+  // Header
+  pinMode(headerA1, OUTPUT);
+  pinMode(headerA2, OUTPUT);
+  pinMode(headerPWM, OUTPUT);
+
   // Left Part || Forward part
   digitalWrite(motorA1, HIGH);
   digitalWrite(motorA2, LOW);
@@ -69,6 +78,10 @@ void setup() {
 
   digitalWrite(motorBB1, HIGH);
   digitalWrite(motorBB2, LOW);
+
+  // Header
+  digitalWrite(headerA1, HIGH);
+  digitalWrite(headerA2, LOW);
 }
 
 void loop() {
@@ -82,10 +95,10 @@ void loop() {
 //   // as expected by master
 // }
 
-//     analogWrite(motorAPWM, 127);
-//     analogWrite(motorBPWM, 127);
+//     analogWrite(motorAPWM, 255);
+//     analogWrite(motorBPWM, 255);
 
-//     analogWrite(motorBBPWM, 127);
+//     analogWrite(motorBBPWM, 255);
 
 //     digitalWrite(motorA1, LOW);
 //     digitalWrite(motorA2, HIGH);
@@ -97,10 +110,10 @@ void loop() {
 //     digitalWrite(motorBB2, HIGH);
 
 
-//     analogWrite(motorAPWM, 127);
-//     analogWrite(motorBPWM, 127);
+//     analogWrite(motorAPWM, 255);
+//     analogWrite(motorBPWM, 255);
 
-//     analogWrite(motorBBPWM, 127);
+//     analogWrite(motorBBPWM, 255);
 
 
 
@@ -112,7 +125,29 @@ void receiveEvent(size_t howMany) {
   }
   int x = Wire.read();
   Serial.println(x);
+  if (x == 100) {
+    Serial.println("Forward-left!!!");
 
+    // left side
+    digitalWrite(motorA1, LOW);
+    digitalWrite(motorA2, HIGH);
+
+    digitalWrite(motorB1, LOW);
+    digitalWrite(motorB2, HIGH);
+
+    analogWrite(motorAPWM, 255);
+    analogWrite(motorBPWM, 255);
+
+    // right side
+    digitalWrite(motorAA1, HIGH);
+    digitalWrite(motorAA2, LOW);
+
+    digitalWrite(motorBB1, HIGH);
+    digitalWrite(motorBB2, LOW);
+
+    analogWrite(motorAAPWM, 255);
+    analogWrite(motorBBPWM, 255);
+  }
   if (x == 102) {
     Serial.println("Forward!!!");
 
@@ -123,22 +158,23 @@ void receiveEvent(size_t howMany) {
     digitalWrite(motorB1, LOW);
     digitalWrite(motorB2, HIGH);
 
-    analogWrite(motorAPWM, 127);
-    analogWrite(motorBPWM, 127);
+    analogWrite(motorAPWM, 180);
+    analogWrite(motorBPWM, 180);
 
     // right side
-    digitalWrite(motorAA1, HIGH);
-    digitalWrite(motorAA2, LOW);
+    digitalWrite(motorAA1, LOW);
+    digitalWrite(motorAA2, HIGH);
 
     digitalWrite(motorBB1, LOW);
     digitalWrite(motorBB2, HIGH);
 
-    analogWrite(motorAAPWM, 127);
-    analogWrite(motorBBPWM, 127);
+    analogWrite(motorAAPWM, 230);
+    analogWrite(motorBBPWM, 230);
   }
-  if (x == 108) {
-    Serial.println("Left!!!");
+  if (x == 103) {
+    Serial.println("Forward-right!!!");
 
+    
     // left side
     digitalWrite(motorA1, HIGH);
     digitalWrite(motorA2, LOW);
@@ -146,8 +182,40 @@ void receiveEvent(size_t howMany) {
     digitalWrite(motorB1, HIGH);
     digitalWrite(motorB2, LOW);
 
-    analogWrite(motorAPWM, 127);
-    analogWrite(motorBPWM, 127);
+    analogWrite(motorAPWM, 255);
+    analogWrite(motorBPWM, 255);
+
+    // right side
+    digitalWrite(motorAA1, LOW);
+    digitalWrite(motorAA2, HIGH);
+
+    digitalWrite(motorBB1, LOW);
+    digitalWrite(motorBB2, HIGH);
+
+    analogWrite(motorAAPWM, 255);
+    analogWrite(motorBBPWM, 255);
+  }
+
+  /*
+  right - l1 -back, l2 -forw, r1 -forw, r2 -back
+  left - l1 -forw, l2 -back, r1 -back, r2 -forw
+  */
+  if (x == 108) {
+    Serial.println("Left!!!");
+
+    // digitalWrite(headerA1, HIGH);
+    // digitalWrite(headerA2, LOW);
+    // analogWrite(headerPWM, 0);
+
+    // left side
+    digitalWrite(motorA1, HIGH);
+    digitalWrite(motorA2, LOW);
+
+    digitalWrite(motorB1, LOW);
+    digitalWrite(motorB2, HIGH);
+
+    analogWrite(motorAPWM, 255);
+    analogWrite(motorBPWM, 255);
 
     // right side
 
@@ -157,32 +225,57 @@ void receiveEvent(size_t howMany) {
     digitalWrite(motorBB1, LOW);
     digitalWrite(motorBB2, HIGH);
 
-    analogWrite(motorAAPWM, 127);
-    analogWrite(motorBBPWM, 127);
+    analogWrite(motorAAPWM, 255);
+    analogWrite(motorBBPWM, 255);
   }
   if (x == 114) {
-    Serial.println("Left!!!");
+    Serial.println("Right!!!");
 
     // left side
     digitalWrite(motorA1, LOW);
     digitalWrite(motorA2, HIGH);
 
-    digitalWrite(motorB1, LOW);
-    digitalWrite(motorB2, HIGH);
+    digitalWrite(motorB1, HIGH);
+    digitalWrite(motorB2, LOW);
 
-    analogWrite(motorAPWM, 127);
-    analogWrite(motorBPWM, 127);
+    analogWrite(motorAPWM, 255);
+    analogWrite(motorBPWM, 255);
 
     // right side
 
-    digitalWrite(motorAA1, LOW);
-    digitalWrite(motorAA2, HIGH);
+    digitalWrite(motorAA1, HIGH);
+    digitalWrite(motorAA2, LOW);
+
+    digitalWrite(motorBB1, LOW);
+    digitalWrite(motorBB2, HIGH);
+
+    analogWrite(motorAAPWM, 255);
+    analogWrite(motorBBPWM, 255);
+  }
+  if (x == 118) {
+    Serial.println("Back-left!!!");
+
+    
+    // left side
+    digitalWrite(motorA1, HIGH);
+    digitalWrite(motorA2, LOW);
+
+    digitalWrite(motorB1, HIGH);
+    digitalWrite(motorB2, LOW);
+
+    analogWrite(motorAPWM, 0);
+    analogWrite(motorBPWM, 255);
+
+    // right side
+
+    digitalWrite(motorAA1, HIGH);
+    digitalWrite(motorAA2, LOW);
 
     digitalWrite(motorBB1, HIGH);
     digitalWrite(motorBB2, LOW);
 
-    analogWrite(motorAAPWM, 127);
-    analogWrite(motorBBPWM, 127);
+    analogWrite(motorAAPWM, 255);
+    analogWrite(motorBBPWM, 0);
   }
   if (x == 98) {
     Serial.println("Backward!!!");
@@ -195,21 +288,50 @@ void receiveEvent(size_t howMany) {
     digitalWrite(motorB1, HIGH);
     digitalWrite(motorB2, LOW);
 
-    analogWrite(motorAPWM, 127);
-    analogWrite(motorBPWM, 127);
+    analogWrite(motorAPWM, 255);
+    analogWrite(motorBPWM, 255);
 
     // right side
 
-    digitalWrite(motorAA1, LOW);
-    digitalWrite(motorAA2, HIGH);
+    digitalWrite(motorAA1, HIGH);
+    digitalWrite(motorAA2, LOW);
 
     digitalWrite(motorBB1, HIGH);
     digitalWrite(motorBB2, LOW);
 
-    analogWrite(motorAAPWM, 127);
-    analogWrite(motorBBPWM, 127);
+    analogWrite(motorAAPWM, 230);
+    analogWrite(motorBBPWM, 230);
+  }
+  if (x == 110) {
+    Serial.println("Back-right!!!");
+    
+    // left side
+    digitalWrite(motorA1, HIGH);
+    digitalWrite(motorA2, LOW);
+
+    digitalWrite(motorB1, HIGH);
+    digitalWrite(motorB2, LOW);
+
+    analogWrite(motorAPWM, 255);
+    analogWrite(motorBPWM, 0);
+
+    // right side
+
+    digitalWrite(motorAA1, HIGH);
+    digitalWrite(motorAA2, LOW);
+
+    digitalWrite(motorBB1, HIGH);
+    digitalWrite(motorBB2, LOW);
+
+    analogWrite(motorAAPWM, 0);
+    analogWrite(motorBBPWM, 255);
   }
   if (x == 101) {
+    // header
+    digitalWrite(headerA1, HIGH);
+    digitalWrite(headerA2, LOW);
+
+    analogWrite(headerPWM, 0);
     // left side
     digitalWrite(motorA1, HIGH);
     digitalWrite(motorA2, LOW);
