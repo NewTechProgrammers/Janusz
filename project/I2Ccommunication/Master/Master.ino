@@ -37,7 +37,7 @@ const char index_html[] PROGMEM = R"rawliteral(
 
 <head>
     <title>ESP Pushbutton Web Server</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1" charset="UTF-8">
     <style>
         body {
             font-family: Arial;
