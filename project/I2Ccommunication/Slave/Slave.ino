@@ -1,7 +1,41 @@
 #include <Wire.h>
- 
+
+class Controller {
+  public:
+    int C_A1 = -1;  int C_B1 = -1;
+    int C_A2 = -1;  int C_B2 = -1;
+    int C_APWM = -1;  int C_BPWM = -1;
+    bool APoles = true;  bool BPoles = true;
+
+    Controller(int _C_A1, int _C_A2, int _C_APWM, int _C_B1, int _C_B2, int _C_BPWM, bool _APoles=true, bool _BPoles = true) : C_A1(_C_A1), C_A2(_C_A2), C_APWM(_C_APWM), APoles(_APoles), C_B1(_C_B1), C_B2(_C_B2), C_BPWM(_C_BPWM), BPoles(_BPoles) {}
+    Controller(int _C_A1, int _C_A2, int _C_APWM, bool _APoles = true) : C_A1(_C_A1), C_A2(_C_A2), C_APWM(_C_APWM), APoles(_APoles) {}
+    
+    void runForwardAandB(int PWMSpeed = 50, int APWMSpeed = -1, int BPWMSpeed = -1) {
+        if (APWMSpeed == -1) { APWMSpeed = PWMSpeed; } if (BPWMSpeed == -1) { BPWMSpeed = PWMSpeed; }
+        runForwardA(APWMSpeed); runForwardB(BPWMSpeed);
+    }
+
+    void runBackwardAandB(int PWMSpeed = 50, int APWMSpeed = -1, int BPWMSpeed = -1) {
+        if (APWMSpeed == -1) { APWMSpeed = PWMSpeed; } if (BPWMSpeed == -1) { BPWMSpeed = PWMSpeed; }
+        runBackwardA(APWMSpeed); runBackwardB(BPWMSpeed);
+    }
+
+    void stopAandB(){ stopA(); stopB(); }
+    
+    void runForwardA(int PWMSpeed = 50) { digitalWrite(C_A1, APoles ? HIGH : LOW); digitalWrite(C_A2, APoles ? LOW : HIGH); analogWrite(C_APWM, PWMSpeed); }
+
+    void runBackwardA(int PWMSpeed = 50){ digitalWrite(C_A1, APoles ? LOW : HIGH); digitalWrite(C_A2, APoles ? HIGH : LOW); analogWrite(C_APWM, PWMSpeed); }
+
+    void stopA() { digitalWrite(C_A1, APoles ? LOW : HIGH); digitalWrite(C_A2, APoles ? HIGH : LOW); analogWrite(C_APWM, 0); }
+    
+    void runForwardB(int PWMSpeed = 50) { digitalWrite(C_B1, BPoles ? HIGH : LOW); digitalWrite(C_B2, BPoles ? LOW : HIGH); analogWrite(C_BPWM, PWMSpeed); }
+
+    void runBackwardB(int PWMSpeed = 50) { digitalWrite(C_B1, BPoles ? LOW : HIGH); digitalWrite(C_B2, BPoles ? HIGH : LOW); analogWrite(C_BPWM, PWMSpeed); }
+    
+    void stopB() { digitalWrite(C_B1, BPoles ? LOW : HIGH); digitalWrite(C_B2, BPoles ? HIGH : LOW); analogWrite(C_BPWM, 0); }
+};
+
 // Front part
- 
 int motorA1 = 13;
 int motorA2 = 12;
 int motorAPWM = 11;
@@ -9,9 +43,10 @@ int motorAPWM = 11;
 int motorB1 = 10;
 int motorB2 = 9;
 int motorBPWM = 8;
- 
+
+Controller front(13, 12, 11, 10, 9, 8, false, false);
+
 // Back part
- 
 int motorAA1 = 7;
 int motorAA2 = 6;
 int motorAAPWM = 5;
@@ -19,17 +54,20 @@ int motorAAPWM = 5;
 int motorBB1 = 4;
 int motorBB2 = 3;
 int motorBBPWM = 2;
+
+Controller back(7, 6, 5, 4, 3, 2, true, false);
  
 // Header part 
-
 int headerA1 = 47;
 int headerA2 = 43;
 int headerPWM = 45;
+
+Controller header(47, 43, 45, true);
  
 void setup() {
   Serial.begin(9600);
   Wire.begin(8);  // join i2c bus with address #8
-  //Wire.onRequest(requestEvent); // register event
+  
   Wire.onReceive(receiveEvent);
   Serial.print("Slave Ready");
  
@@ -67,132 +105,49 @@ void receiveEvent(size_t howMany) {
   }
   int x = Wire.read();
   Serial.println(x);
+  // 'f' (102) - forward | 'l' (108) - left | 'r' (114) - right | 'b' (98) - backward | 'e' (101) - stop | 'h' (104) - header
   if (x == 102) {
     Serial.println("Forward!!!");
  
-    // Front side part
-    digitalWrite(motorA1, LOW);
-    digitalWrite(motorA2, HIGH);
- 
-    digitalWrite(motorB1, LOW);
-    digitalWrite(motorB2, HIGH);
- 
-    analogWrite(motorAPWM, 230);
-    analogWrite(motorBPWM, 230);
- 
-    // Back side part
-    digitalWrite(motorAA1, HIGH);
-    digitalWrite(motorAA2, LOW);
- 
-    digitalWrite(motorBB1, LOW);
-    digitalWrite(motorBB2, HIGH);
- 
-    analogWrite(motorAAPWM, 230);
-    analogWrite(motorBBPWM, 230);
+    front.runForwardAandB(255);
+    back.runForwardAandB(255);
   }
  
-  /*
-  right - l1 -back, l2 -forw, r1 -forw, r2 -back
-  left - l1 -forw, l2 -back, r1 -back, r2 -forw
-  */
   if (x == 108) {
     Serial.println("Left!!!");
  
-    // Front side part
-    digitalWrite(motorA1, HIGH);
-    digitalWrite(motorA2, LOW);
+    front.runBackwardA(255);
+    front.runForwardB(255);
  
-    digitalWrite(motorB1, LOW);
-    digitalWrite(motorB2, HIGH);
- 
-    analogWrite(motorAPWM, 180);
-    analogWrite(motorBPWM, 255);
- 
-    // Back side part
- 
-    digitalWrite(motorAA1, LOW);
-    digitalWrite(motorAA2, HIGH);
- 
-    digitalWrite(motorBB1, LOW);
-    digitalWrite(motorBB2, HIGH);
- 
-    analogWrite(motorAAPWM, 180);
-    analogWrite(motorBBPWM, 255);
+    back.runBackwardA(255);
+    back.runForwardB(255);
   }
+
   if (x == 114) {
     Serial.println("Right!!!");
  
-    // Front side part
-    digitalWrite(motorA1, LOW);
-    digitalWrite(motorA2, HIGH);
+    front.runBackwardB(255);
+    front.runForwardA(255);
  
-    digitalWrite(motorB1, HIGH);
-    digitalWrite(motorB2, LOW);
- 
-    analogWrite(motorAPWM, 255);
-    analogWrite(motorBPWM, 180);
- 
-    // Left side part
- 
-    digitalWrite(motorAA1, HIGH);
-    digitalWrite(motorAA2, LOW);
- 
-    digitalWrite(motorBB1, HIGH);
-    digitalWrite(motorBB2, LOW);
- 
-    analogWrite(motorAAPWM, 255);
-    analogWrite(motorBBPWM, 180);
+    back.runBackwardB(255);
+    back.runForwardA(255);
   }
+
   if (x == 98) {
     Serial.println("Backward!!!");
- 
- 
-    // Front side part
-    digitalWrite(motorA1, HIGH);
-    digitalWrite(motorA2, LOW);
- 
-    digitalWrite(motorB1, HIGH);
-    digitalWrite(motorB2, LOW);
- 
-    analogWrite(motorAPWM, 255);
-    analogWrite(motorBPWM, 255);
- 
-    // Back side part
- 
-    digitalWrite(motorAA1, LOW);
-    digitalWrite(motorAA2, HIGH);
- 
-    digitalWrite(motorBB1, HIGH);
-    digitalWrite(motorBB2, LOW);
- 
-    analogWrite(motorAAPWM, 230);
-    analogWrite(motorBBPWM, 230);
+
+    front.runBackwardAandB(255);
+    back.runBackwardAandB(255);
   }
+
   if (x == 101) {
-    // header
+    Serial.println("Stop!!!");
     digitalWrite(headerA1, HIGH);
     digitalWrite(headerA2, LOW);
  
     analogWrite(headerPWM, 0);
 
-    // Front side part
-    digitalWrite(motorA1, HIGH);
-    digitalWrite(motorA2, LOW);
- 
-    digitalWrite(motorB1, HIGH);
-    digitalWrite(motorB2, LOW);
- 
-    analogWrite(motorAPWM, 0);
-    analogWrite(motorBPWM, 0);
- 
-    // Left side part
-    digitalWrite(motorAA1, HIGH);
-    digitalWrite(motorAA2, LOW);
- 
-    digitalWrite(motorBB1, HIGH);
-    digitalWrite(motorBB2, LOW);
- 
-    analogWrite(motorAAPWM, 0);
-    analogWrite(motorBBPWM, 0);
+    front.stopAandB();
+    back.stopAandB();
   }
 }
