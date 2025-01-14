@@ -219,7 +219,8 @@ void setup() {
   Serial.println(WiFi.localIP());  // 192.168.4.1
 
   // initialize digital pin LED_BUILTIN as an output.
-
+  pinMode(BUILTIN_LED, OUTPUT);
+  digitalWrite(BUILTIN_LED, LOW);
 
   // Send web page to client
   server.on("/", HTTP_GET, [](AsyncWebServerRequest *request) {
