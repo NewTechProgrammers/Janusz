@@ -114,35 +114,32 @@ const char index_html[] PROGMEM = R"rawliteral(
             <div class="movement">
                 <div class="rows">
                     <div class="top row">
-                        <button class="button top edgeleft" id="btn1" onmousedown="toggleCheckbox('forwleft');"
-                            ontouchstart="toggleCheckbox('forwleft');" onmouseup="toggleCheckbox('off');"
-                            ontouchend="toggleCheckbox('off');">↖</button>
-                        <button class="button top mid" id="btn2" onmousedown="toggleCheckbox('on');"
-                            ontouchstart="toggleCheckbox('on');" onmouseup="toggleCheckbox('off');"
-                            ontouchend="toggleCheckbox('off');">⬆</button>
-                        <button class="button top edgeright" id="btn3" onmousedown="toggleCheckbox('forwright');"
-                            ontouchstart="toggleCheckbox('forwright');" onmouseup="toggleCheckbox('off');"
-                            ontouchend="toggleCheckbox('off');">↗</button>
+                        <span style="padding: 10px 80px; margin: 8px;"></span>
+                        <button class="button-main top mid" id="btn2" onmousedown="toggleCheckbox('forw');"
+                            ontouchstart="toggleCheckbox('forw');" onmouseup="toggleCheckbox('off');"
+                            ontouchend="toggleCheckbox('off');">F</button>
+                        <span style="padding: 10px 80px; margin: 8px;"></span>
                     </div>
                     <div class="mid row">
-                        <button class="button middle left" id="btn1" onmousedown="toggleCheckbox('left');"
+                        <button class="button-main middle left" id="btn1" onmousedown="toggleCheckbox('left');"
                             ontouchstart="toggleCheckbox('left');" onmouseup="toggleCheckbox('off');"
-                            ontouchend="toggleCheckbox('off');">⬅</button>
-                        <span style="padding: 10px 80px; margin: 8px;"></span>
-                        <button class="button middle right" id="btn3" onmousedown="toggleCheckbox('right');"
+                            ontouchend="toggleCheckbox('off');">L</button>
+                        <div class= "middle mid" style="display: flex; flex-direction: column; justify-content: space-between; height: 160px; margin: 8px; width: 160px; border-radius: 5px;">
+                          <button class="button middle left" style="background-color: green; height: 50%; margin-bottom: 15px;" id="header-btn2" onclick="toggleCheckbox('header-f')" ontouchstart="releaseButton('header-f')">HF</button>
+                          <button class="button middle left" style="background-color: green; height: 50%;" id="header-btn2" onclick="toggleCheckbox('header-b')" ontouchstart="releaseButton('header-b')">HB</button>
+                                                  
+                        </div>
+                        
+                        <button class="button-main middle right" id="btn3" onmousedown="toggleCheckbox('right');"
                             ontouchstart="toggleCheckbox('right');" onmouseup="toggleCheckbox('off');"
-                            ontouchend="toggleCheckbox('off');">➡</button>
+                            ontouchend="toggleCheckbox('off');">R</button>
                     </div>
                     <div class="bot row">
-                        <button class="button bot edgeleft" id="btn1" onmousedown="toggleCheckbox('backleft');"
-                            ontouchstart="toggleCheckbox('backleft');" onmouseup="toggleCheckbox('off');"
-                            ontouchend="toggleCheckbox('off');">↙</button>
-                        <button class="button bot mid" id="btn2" onmousedown="toggleCheckbox('back');"
+                        <span style="padding: 10px 80px; margin: 8px;"></span>
+                        <button class="button-main bot mid" id="btn2" onmousedown="toggleCheckbox('back');"
                             ontouchstart="toggleCheckbox('back');" onmouseup="toggleCheckbox('off');"
-                            ontouchend="toggleCheckbox('off');">⬇</button>
-                        <button class="button bot edgeright" id="btn3" onmousedown="toggleCheckbox('backright');"
-                            ontouchstart="toggleCheckbox('backright');" onmouseup="toggleCheckbox('off');"
-                            ontouchend="toggleCheckbox('off');">↘</button>
+                            ontouchend="toggleCheckbox('off');">B</button>
+                        <span style="padding: 10px 80px; margin: 8px;"></span>
                     </div>
                 </div>
             </div>
@@ -167,6 +164,22 @@ void notFound(AsyncWebServerRequest *request) {
 
 AsyncWebServer server(80);
 
+
+void transmit(char direction) {
+  Wire.beginTransmission(8);
+  Wire.write(direction);
+  Wire.endTransmission();
+
+  std::cout << "direction " << direction << "\n";
+}
+
+void transmitEnd() {
+  Wire.beginTransmission(8);
+  Wire.write('e');
+  //Wire.write(x);
+  Wire.endTransmission();
+  std::cout << "\n";
+}
 // the setup function runs once when you press reset or power the board
 void setup() {
 
@@ -174,10 +187,6 @@ void setup() {
   Serial.begin(9600);  // start serial for output
   delay(100);
   Serial.println("Master Ready");
-
-
-  //Serial.begin(115200);
-  Serial.println("\n\nyo");
 
   Serial.print("Setting AP (Access Point)…");
   WiFi.softAP(ssid, password);
@@ -198,19 +207,19 @@ void setup() {
   });
 
   // Receive an HTTP GET request
-  server.on("/on", HTTP_GET, [](AsyncWebServerRequest *request) {
+
+  server.on("/header-f", HTTP_GET, [](AsyncWebServerRequest *request) {
+    transmit('q');
+    request->send(200, "text/plain", "ok");
+  });
+
+  server.on("/header-b", HTTP_GET, [](AsyncWebServerRequest *request) {
+    transmit('j');
+    request->send(200, "text/plain", "ok");
+  });
+
+  server.on("/forw", HTTP_GET, [](AsyncWebServerRequest *request) {
     transmit('f');
-
-    request->send(200, "text/plain", "ok");
-  });
-
-  server.on("/forwleft", HTTP_GET, [](AsyncWebServerRequest *request) {
-    transmit('d');
-    request->send(200, "text/plain", "ok");
-  });
-
-  server.on("/forwright", HTTP_GET, [](AsyncWebServerRequest *request) {
-    transmit('g');
     request->send(200, "text/plain", "ok");
   });
 
@@ -229,16 +238,6 @@ void setup() {
     request->send(200, "text/plain", "ok");
   });
 
-  server.on("/backleft", HTTP_GET, [](AsyncWebServerRequest *request) {
-    transmit('v');
-    request->send(200, "text/plain", "ok");
-  });
-
-  server.on("/backright", HTTP_GET, [](AsyncWebServerRequest *request) {
-    transmit('n');
-    request->send(200, "text/plain", "ok");
-  });
-
   // Receive an HTTP GET request
   server.on("/off", HTTP_GET, [](AsyncWebServerRequest *request) {
     transmitEnd();
@@ -249,32 +248,4 @@ void setup() {
   server.begin();
 }
 
-
-void loop() {
-}
-
-void transmitDefault() {
-  Wire.beginTransmission(8);
-  Wire.write("x is ");
-  Wire.write(x);
-  Wire.endTransmission();
-
-  x++;
-  std::cout << "\n";
-}
-
-void transmit(char direction) {
-  Wire.beginTransmission(8);
-  Wire.write(direction);
-  Wire.endTransmission();
-
-  std::cout << "direction " << direction << "\n";
-}
-
-void transmitEnd() {
-  Wire.beginTransmission(8);
-  Wire.write('e');
-  //Wire.write(x);
-  Wire.endTransmission();
-  std::cout << "\n";
-}
+void loop() {}
