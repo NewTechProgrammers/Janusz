@@ -46,6 +46,25 @@ const char index_html[] PROGMEM = R"rawliteral(
 
         .button {
             font-weight: bold;
+            font-size: 24px;
+            text-align: center;
+            outline: none;
+            color: #fff;
+            background-color: #2f4468;
+            border: none;
+            border-radius: 5px;
+            box-shadow: 0 6px #999;
+            cursor: pointer;
+            -webkit-touch-callout: none;
+            -webkit-user-select: none;
+            -khtml-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            user-select: none;
+            -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
+        }
+        .button-main {
+            font-weight: bold;
             width: 20px;
             padding: 15px 80px;
             margin: 8px;
@@ -147,15 +166,16 @@ const char index_html[] PROGMEM = R"rawliteral(
     </div>
     <h1>ESP Pushbutton Web Server</h1>
     <script>
+
         function toggleCheckbox(x) {
-            var xhr = new XMLHttpRequest();
-            xhr.open("GET", "/" + x, true);
-            xhr.send();
+                var xhr = new XMLHttpRequest();
+                xhr.open("GET", "/" + x, true);
+                xhr.send();
         }
     </script>
 </body>
 
-</html>
+</html> 
 )rawliteral";
 
 void notFound(AsyncWebServerRequest *request) {
