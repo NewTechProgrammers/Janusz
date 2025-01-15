@@ -13,8 +13,6 @@
 const char *ssid = "Janusz";
 const char *password = "11111111";
 
-const int output = 5;
-
 byte x = 0;
 
 // HTML web page
@@ -103,8 +101,6 @@ void setup() {
   server.on("/", HTTP_GET, [](AsyncWebServerRequest *request) {
     request->send_P(200, "text/html", index_html);
   });
-
-  // Receive an HTTP GET request
 
   server.on("/header-f", HTTP_GET, [](AsyncWebServerRequest *request) {
     transmit('q');
