@@ -5,17 +5,17 @@
 #include <ESP8266WiFi.h> // Include WiFi library for ESP8266 | Biblioteka WiFi dla ESP8266 
 #include <ESPAsyncTCP.h> // Include asynchronous TCP library for ESP8266 | Asynchroniczna biblioteka AsyncTCP dla ESP8266
 #endif
-#include <ESPAsyncWebServer.h> // Include library for running a web server | Biblioteka do obsługi serwera WWW
+#include <ESPAsyncWebServer.h> // Include library for running a web server | Biblioteka do obslugi serwera WWW
 
 #include <Wire.h> // Include library for I2C communication | Biblioteka do komunikacji I2C
 
-// REPLACE WITH YOUR NETWORK CREDENTIALS | ZASTĄP SWOIMI DANYMI SIECI
+// REPLACE WITH YOUR NETWORK CREDENTIALS | ZASTAP SWOIMI DANYMI SIECI
 const char *ssid = "Janusz"; // Your WiFi network name | Nazwa sieci WiFi
-const char *password = "11111111"; // Your WiFi network password | Hasło do sieci WiFi
+const char *password = "11111111"; // Your WiFi network password | Haslo do sieci WiFi
 
 byte x = 0; // Buffer variable for transmissions | Zmienna buforowa dla komunikacji
 
-// HTML page content stored in flash memory (PROGMEM) to save RAM | Strona HTML zapisana w pamięci flash (PROGMEM), aby oszczędzać RAM
+// HTML page content stored in flash memory (PROGMEM) to save RAM | Strona HTML zapisana w pamieci flash (PROGMEM), aby oszczedzac RAM
 const char index_html[] PROGMEM = R"rawliteral(
 <!DOCTYPE HTML>
 <html>
@@ -58,29 +58,29 @@ const char index_html[] PROGMEM = R"rawliteral(
 )rawliteral";
 
 void notFound(AsyncWebServerRequest *request) {
-  // Handle requests to unknown URLs and respond with 404 Not Found | Obsługa żądań do nieznanych adresów URL i odpowiedź "404 Not Found"
+  // Handle requests to unknown URLs and respond with 404 Not Found | Obsluga zadan do nieznanych adresow URL i odpowiedz "404 Not Found"
   request->send(404, "text/plain", "Not found");
 }
 
 AsyncWebServer server(80); // Create a web server object on port 80 | Tworzenie obiektu serwera WWW na porcie 80
 
 void transmit(char direction) {
-  // Send a single character via I2C to another device | Wysyłanie pojedynczego znaku za pomocą I2C do innego urządzenia
+  // Send a single character via I2C to another device | Wysylanie pojedynczego znaku za pomoca I2C do innego urzadzenia
   Wire.beginTransmission(8);
   Wire.write(direction);
   Wire.endTransmission();
 }
 
 void transmitEnd() {
-  // Send an end signal to stop any ongoing commands ([e] is 101 in ASCII) | Wysłanie sygnału zakończenia, aby zatrzymać trwające polecenia ([e] to 101 w ASCII)
+  // Send an end signal to stop any ongoing commands ([e] is 101 in ASCII) | Wyslanie sygnalu zakonczenia, aby zatrzymac trwajace polecenia ([e] to 101 w ASCII)
   transmit('e');
 }
 
-// The setup function runs once when the microcontroller is powered on or reset | Funkcja setup uruchamia się raz po włączeniu mikrokontrolera lub resecie
+// The setup function runs once when the microcontroller is powered on or reset | Funkcja setup uruchamia sie raz po wlaczeniu mikrokontrolera lub resecie
 void setup() {
   Wire.begin(4, 5); // Join i2c bus (address optional for master) 4, 5 are default | Inicjalizacja magistrali I2C na pinach 4 (SDA) i 5 (SCL)
-  Serial.begin(115200); // Start serial communication for output | Rozpoczęcie komunikacji szeregowej do debugowania
-  delay(400); // Short delay for setup | Krótkie opóźnienie na potrzeby ustawień
+  Serial.begin(115200); // Start serial communication for output | Rozpoczecie komunikacji szeregowej do debugowania
+  delay(400); // Short delay for setup | Krotkie opoznienie na potrzeby ustawien
   Serial.println("Master Ready");
 
   Serial.print("Setting AP (Access Point)…");
@@ -90,9 +90,9 @@ void setup() {
   Serial.print("AP IP address: ");
   Serial.println(IP);
 
-  Serial.println(WiFi.localIP()); // Print ESP8266 local IP address - 192.168.4.1 | Wyświetlenie lokalnego adresu IP - 192.168.4.1
+  Serial.println(WiFi.localIP()); // Print ESP8266 local IP address - 192.168.4.1 | Wyswietlenie lokalnego adresu IP - 192.168.4.1
 
-  // Turn on the built-in LED initially after the setup | Włączenie wbudowanej diody po konfiguracji
+  // Turn on the built-in LED initially after the setup | Wlaczenie wbudowanej diody po konfiguracji
   pinMode(BUILTIN_LED, OUTPUT);
   digitalWrite(BUILTIN_LED, LOW);
 
@@ -107,7 +107,7 @@ void setup() {
   });
 
   server.on("/header-b", HTTP_GET, [](AsyncWebServerRequest *request) {
-    transmit('j'); // Command to move header backward ([j] is 106 in ASCII) | Polecenie ruchu headera do tyłu ([j] to 106 w ASCII)
+    transmit('j'); // Command to move header backward ([j] is 106 in ASCII) | Polecenie ruchu headera do tylu ([j] to 106 w ASCII)
     request->send(200, "text/plain", "ok");
   });
 
@@ -127,7 +127,7 @@ void setup() {
   });
 
   server.on("/back", HTTP_GET, [](AsyncWebServerRequest *request) {
-    transmit('b'); // Command to move backward ([b] is 98 in ASCII) | Polecenie jazdy do tyłu ([b] to 98 w ASCII)
+    transmit('b'); // Command to move backward ([b] is 98 in ASCII) | Polecenie jazdy do tylu ([b] to 98 w ASCII)
     request->send(200, "text/plain", "ok");
   });
 
@@ -136,8 +136,8 @@ void setup() {
     request->send(200, "text/plain", "ok");
   });
 
-  server.onNotFound(notFound); // Handle unknown URL requests | Obsługa requestów do nieznanych routów URL
+  server.onNotFound(notFound); // Handle unknown URL requests | Obsluga requestow do nieznanych routow URL
   server.begin(); // Start the web server | Uruchomienie serwera WWW
 }
 
-void loop() {} // The loop function is empty because the web server operates asynchronously | Funkcja loop jest pusta, ponieważ serwer WWW działa asynchronicznie
+void loop() {} // The loop function is empty because the web server operates asynchronously | Funkcja loop jest pusta, poniewaz serwer WWW dziala asynchronicznie
