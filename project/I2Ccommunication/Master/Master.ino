@@ -1,21 +1,21 @@
 #ifdef ESP32
-#include <WiFi.h>
-#include <AsyncTCP.h>
+#include <WiFi.h> // Include WiFi library for ESP32 | Biblioteka WiFi dla ESP8266 
+#include <AsyncTCP.h> // Include asynchronous TCP library for ESP32 | Asynchroniczna biblioteka AsyncTCP dla ESP32
 #else
-#include <ESP8266WiFi.h>
-#include <ESPAsyncTCP.h>
+#include <ESP8266WiFi.h> // Include WiFi library for ESP8266 | Biblioteka WiFi dla ESP8266 
+#include <ESPAsyncTCP.h> // Include asynchronous TCP library for ESP8266 | Asynchroniczna biblioteka AsyncTCP dla ESP8266
 #endif
-#include <ESPAsyncWebServer.h>
+#include <ESPAsyncWebServer.h> // Include library for running a web server | Biblioteka do obsługi serwera WWW
 
-#include <Wire.h>
+#include <Wire.h> // Include library for I2C communication | Biblioteka do komunikacji I2C
 
-// REPLACE WITH YOUR NETWORK CREDENTIALS
-const char *ssid = "Janusz";
-const char *password = "11111111";
+// REPLACE WITH YOUR NETWORK CREDENTIALS | ZASTĄP SWOIMI DANYMI SIECI
+const char *ssid = "Janusz"; // Your WiFi network name | Nazwa sieci WiFi
+const char *password = "11111111"; // Your WiFi network password | Hasło do sieci WiFi
 
-byte x = 0;
+byte x = 0; // Buffer variable for transmissions | Zmienna buforowa dla komunikacji
 
-// HTML web page
+// HTML page content stored in flash memory (PROGMEM) to save RAM | Strona HTML zapisana w pamięci flash (PROGMEM), aby oszczędzać RAM
 const char index_html[] PROGMEM = R"rawliteral(
 <!DOCTYPE HTML>
 <html>
@@ -58,84 +58,86 @@ const char index_html[] PROGMEM = R"rawliteral(
 )rawliteral";
 
 void notFound(AsyncWebServerRequest *request) {
+  // Handle requests to unknown URLs and respond with 404 Not Found | Obsługa żądań do nieznanych adresów URL i odpowiedź "404 Not Found"
   request->send(404, "text/plain", "Not found");
 }
 
-AsyncWebServer server(80);
+AsyncWebServer server(80); // Create a web server object on port 80 | Tworzenie obiektu serwera WWW na porcie 80
 
 void transmit(char direction) {
+  // Send a single character via I2C to another device | Wysyłanie pojedynczego znaku za pomocą I2C do innego urządzenia
   Wire.beginTransmission(8);
   Wire.write(direction);
   Wire.endTransmission();
 }
 
 void transmitEnd() {
+  // Send an end signal to stop any ongoing commands ([e] is 101 in ASCII) | Wysłanie sygnału zakończenia, aby zatrzymać trwające polecenia ([e] to 101 w ASCII)
   transmit('e');
 }
 
-// the setup function runs once when you press reset or power the board
+// The setup function runs once when the microcontroller is powered on or reset | Funkcja setup uruchamia się raz po włączeniu mikrokontrolera lub resecie
 void setup() {
-  Wire.begin();    // join i2c bus (address optional for master) 4, 5 are default
-  Serial.begin(115200);  // start serial for output
-  delay(400);
+  Wire.begin(4, 5); // Join i2c bus (address optional for master) 4, 5 are default | Inicjalizacja magistrali I2C na pinach 4 (SDA) i 5 (SCL)
+  Serial.begin(115200); // Start serial communication for output | Rozpoczęcie komunikacji szeregowej do debugowania
+  delay(400); // Short delay for setup | Krótkie opóźnienie na potrzeby ustawień
   Serial.println("Master Ready");
 
   Serial.print("Setting AP (Access Point)…");
-  WiFi.softAP(ssid, password);
+  WiFi.softAP(ssid, password); // Create a WiFi access point | Utworzenie WiFi hotspota
 
-  IPAddress IP = WiFi.softAPIP();
+  IPAddress IP = WiFi.softAPIP(); // Get the IP address of the access point | Pobranie adresu IP hotspota
   Serial.print("AP IP address: ");
   Serial.println(IP);
 
-  // Print ESP8266 Local IP Address
-  Serial.println(WiFi.localIP());  // 192.168.4.1
+  Serial.println(WiFi.localIP()); // Print ESP8266 local IP address - 192.168.4.1 | Wyświetlenie lokalnego adresu IP - 192.168.4.1
 
-  // initialize digital pin LED_BUILTIN as an output.
+  // Turn on the built-in LED initially after the setup | Włączenie wbudowanej diody po konfiguracji
   pinMode(BUILTIN_LED, OUTPUT);
   digitalWrite(BUILTIN_LED, LOW);
 
-  // Send web page to client
+  // Define web server routes | Definicja tras serwera WWW
   server.on("/", HTTP_GET, [](AsyncWebServerRequest *request) {
-    request->send_P(200, "text/html", index_html);
+    request->send_P(200, "text/html", index_html); // Serve the main HTML page
   });
 
   server.on("/header-f", HTTP_GET, [](AsyncWebServerRequest *request) {
-    transmit('q');
+    transmit('q'); // Command to move header forward ([q] is 113 in ASCII) | Polecenie ruchu headera do przodu ([q] to 113 w ASCII)
     request->send(200, "text/plain", "ok");
   });
 
   server.on("/header-b", HTTP_GET, [](AsyncWebServerRequest *request) {
-    transmit('j');
+    transmit('j'); // Command to move header backward ([j] is 106 in ASCII) | Polecenie ruchu headera do tyłu ([j] to 106 w ASCII)
     request->send(200, "text/plain", "ok");
   });
 
   server.on("/forw", HTTP_GET, [](AsyncWebServerRequest *request) {
-    transmit('f');
+    transmit('f'); // Command to move forward ([f] is 102 in ASCII) | Polecenie jazdy do przodu ([f] to 102 w ASCII)
     request->send(200, "text/plain", "ok");
   });
 
   server.on("/left", HTTP_GET, [](AsyncWebServerRequest *request) {
-    transmit('l');
+    transmit('l'); // Command to move left ([l] is 108 in ASCII) | Polecenie jazdy w lewo ([l] to 108 w ASCII)
     request->send(200, "text/plain", "ok");
   });
 
   server.on("/right", HTTP_GET, [](AsyncWebServerRequest *request) {
-    transmit('r');
+    transmit('r'); // Command to move right ([r] is 114 in ASCII) | Polecenie jazdy w prawo ([r] to 114 w ASCII)
     request->send(200, "text/plain", "ok");
   });
 
   server.on("/back", HTTP_GET, [](AsyncWebServerRequest *request) {
-    transmit('b');
+    transmit('b'); // Command to move backward ([b] is 98 in ASCII) | Polecenie jazdy do tyłu ([b] to 98 w ASCII)
     request->send(200, "text/plain", "ok");
   });
 
   server.on("/off", HTTP_GET, [](AsyncWebServerRequest *request) {
-    transmitEnd();
+    transmitEnd(); // Command to stop movement | Polecenie zatrzymania ruchu
     request->send(200, "text/plain", "ok");
   });
 
-  server.onNotFound(notFound);
-  server.begin();
+  server.onNotFound(notFound); // Handle unknown URL requests | Obsługa requestów do nieznanych routów URL
+  server.begin(); // Start the web server | Uruchomienie serwera WWW
 }
 
-void loop() {}
+void loop() {} // The loop function is empty because the web server operates asynchronously | Funkcja loop jest pusta, ponieważ serwer WWW działa asynchronicznie
