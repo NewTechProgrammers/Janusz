@@ -129,7 +129,6 @@ void setup() {
     request->send(200, "text/plain", "ok");
   });
 
-  // Receive an HTTP GET request
   server.on("/off", HTTP_GET, [](AsyncWebServerRequest *request) {
     transmitEnd();
     request->send(200, "text/plain", "ok");
