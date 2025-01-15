@@ -70,14 +70,11 @@ void transmit(char direction) {
 }
 
 void transmitEnd() {
-  Wire.beginTransmission(8);
-  Wire.write('e');
-  Wire.endTransmission();
+  transmit('e');
 }
 
 // the setup function runs once when you press reset or power the board
 void setup() {
-
   Wire.begin();    // join i2c bus (address optional for master) 4, 5 are default
   Serial.begin(115200);  // start serial for output
   delay(400);
